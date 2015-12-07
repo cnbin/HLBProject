@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "Word.h"
 #import "ChineseInclude.h"
 #import "PinYinForObjc.h"
 

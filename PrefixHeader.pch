@@ -16,3 +16,7 @@
 #import "GlobalResource.h"
 #define SystemThemeColor [UIColor colorWithRed:0 green:199.0f/255.0f blue:140.0f/255.0f alpha:1.0f]
 #define webserviceURL @"http://192.168.20.5:10089/DWTong/Webservice/MobileService.asmx"
+
+#define plistPath [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"ConnectUser.plist"]
+
+

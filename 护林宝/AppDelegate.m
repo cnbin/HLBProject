@@ -10,8 +10,6 @@
 #import "MenuViewController.h"
 #import "NotificationTableViewController.h"
 #import "SettingViewController.h"
-
-#import "Word.h"
 #import "NSString+URLEncoding.h"
 #import "AFNetworking.h"
 #import "PinYin4Objc.h"
@@ -20,6 +18,7 @@
 @interface AppDelegate ()<UIAlertViewDelegate>
 
 @property (strong, nonatomic) UITabBarController * tabBarController;
+@property (strong, nonatomic) NSMutableDictionary * connectUserDict;
 
 @end
 
@@ -45,6 +44,8 @@
     
     else
     {
+       self.connectUserDict = [NSMutableDictionary dictionary];
+        
        [self connectPeople];
     }
     
@@ -155,29 +156,32 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
             
             NSError *error;
             NSData *data =[strhtml dataUsingEncoding:NSUTF8StringEncoding];
+            
             self.jsonArray = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:&error];
             
+            if (self.jsonArray != nil && ![self.jsonArray isKindOfClass:[NSNull class]] && self.jsonArray.count != 0) {
+                
             for (int i=0; i<self.jsonArray.count; i++) {
-                
-                NSString *sourceText=[[self.jsonArray objectAtIndex:i]objectForKey:@"TrueName"];
+                    
+                [self.connectUserDict setObject:[[self.jsonArray objectAtIndex:i]objectForKey:@"UserName"] forKey:[[self.jsonArray objectAtIndex:i]objectForKey:@"TrueName"]];
+                }
+            
+                NSFileManager *fm = [NSFileManager defaultManager];
 
-                HanyuPinyinOutputFormat *outputFormat=[[HanyuPinyinOutputFormat alloc] init];
-                [outputFormat setToneType:ToneTypeWithoutTone];
-                [outputFormat setVCharType:VCharTypeWithV];
-                [outputFormat setCaseType:CaseTypeLowercase];
-                NSString *outputPinyin=[PinyinHelper toHanyuPinyinStringWithNSString:sourceText withHanyuPinyinOutputFormat:outputFormat withNSString:@" "];
-             
-                Word * word = [Word MR_createEntity];
-                word.pinyin = outputPinyin;
-                word.zhongwen = sourceText;
-   
-                [[NSManagedObjectContext MR_defaultContext]MR_saveToPersistentStoreAndWait];
-                
+                //开始创建文件
+                [fm createFileAtPath:plistPath contents:nil attributes:nil];
+                    
+                //把数据写入plist文件
+                [self.connectUserDict writeToFile:plistPath atomically:YES];
+          }
+        else {
+                [self connectPeople];
             }
             
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
             
         }];
+    
         [operation start];
     
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"key_isConnectPeople"];
